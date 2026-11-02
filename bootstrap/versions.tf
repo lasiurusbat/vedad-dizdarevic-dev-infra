@@ -7,11 +7,17 @@ terraform {
       version = "~> 6.0"
     }
   }
+
+  # Bootstrap was first applied with LOCAL state (it creates this bucket), then migrated here:
+  #   terraform init -migrate-state -backend-config=backend.hcl
+  backend "s3" {
+    key          = "bootstrap/terraform.tfstate"
+    region       = "eu-central-1"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
-# Bootstrap uses LOCAL state on purpose: it creates the bucket that main/ stores its state in.
-# Applied once, by hand. Keep terraform.tfstate safe (it is git-ignored) or migrate it into the
-# state bucket afterwards with `terraform init -migrate-state` and a backend block.
 provider "aws" {
   region = var.region
 
