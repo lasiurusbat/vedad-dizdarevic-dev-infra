@@ -70,3 +70,8 @@ Thumbs.db
 # Temp
 tmp/
 .tmp/
+
+# Terraform build artefacts
+.build/
+
+!backend.hcl

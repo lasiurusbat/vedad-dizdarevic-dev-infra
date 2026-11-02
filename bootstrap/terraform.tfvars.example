@@ -1,0 +1,5 @@
+state_bucket_name = "vdd-tfstate-123456789012"
+site_bucket_name  = "vdd-site-123456789012"
+github_org        = "your-org"
+app_repo          = "vedad-dizdarevic.dev-app"
+infra_repo        = "vedad-dizdarevic.dev-infra"
