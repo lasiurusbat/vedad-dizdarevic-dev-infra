@@ -114,10 +114,6 @@ resource "cloudflare_turnstile_widget" "contact" {
   region     = "world"
 }
 
-# Cookieless analytics. The beacon is injected at the edge; the CSP already allows
-# static.cloudflareinsights.com and cloudflareinsights.com.
-resource "cloudflare_web_analytics_site" "site" {
-  account_id   = var.cloudflare_account_id
-  zone_tag     = cloudflare_zone.site.id
-  auto_install = true
-}
+# Cloudflare Web Analytics (cookieless) is enabled in the dashboard for now, not managed here:
+# the Terraform token got 403 on the rum/site_info API even with Account Settings Edit and
+# Account Analytics Read. Revisit in Phase 10; the CSP already allows static.cloudflareinsights.com.
