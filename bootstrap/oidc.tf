@@ -5,8 +5,10 @@ data "aws_iam_openid_connect_provider" "github" {
 
 locals {
   oidc_host = "token.actions.githubusercontent.com"
-  infra_sub = "repo:${var.github_org}/${var.infra_repo}"
-  app_sub   = "repo:${var.github_org}/${var.app_repo}"
+  # These repos use GitHub immutable OIDC subjects: repo:<owner>@<ownerId>/<repo>@<repoId>.
+  # Pinning the numeric IDs means a deleted-and-recreated repo (or a re-registered name) cannot assume these roles.
+  infra_sub = "repo:${var.github_org}@${var.github_owner_id}/${var.infra_repo}@${var.infra_repo_id}"
+  app_sub   = "repo:${var.github_org}@${var.github_owner_id}/${var.app_repo}@${var.app_repo_id}"
 }
 
 # Trust policies: each role is limited to one repo and one ref (or environment / PR event).
