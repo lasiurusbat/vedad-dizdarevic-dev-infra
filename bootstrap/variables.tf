@@ -34,3 +34,18 @@ variable "infra_apply_environment" {
   type        = string
   default     = "production"
 }
+
+variable "github_owner_id" {
+  description = "Numeric ID of the GitHub owner. Used in the immutable OIDC subject. `gh api users/<owner> --jq .id`"
+  type        = number
+}
+
+variable "app_repo_id" {
+  description = "Numeric ID of the app repo. `gh api repos/<owner>/<repo> --jq .id`"
+  type        = number
+}
+
+variable "infra_repo_id" {
+  description = "Numeric ID of the infra repo. `gh api repos/<owner>/<repo> --jq .id`"
+  type        = number
+}
