@@ -1,0 +1,72 @@
+# Terraform working directory and providers
+.terraform/
+# Keep .terraform.lock.hcl committed (pins provider versions and hashes)
+
+# State (remote state lives in S3; never commit local state)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Plans (can contain secrets)
+*.tfplan
+tfplan
+plan.out
+plan.json
+
+# Variable files (may contain secrets); examples stay tracked
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.auto.tfvars.example
+
+# Local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Terraform CLI config
+.terraformrc
+terraform.rc
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials
+*.access_key
+
+# Scan and tool output
+.trivy/
+.checkov/
+checkov-report*
+trivy-report*
+results.sarif
+*.sarif
+
+# Logs
+*.log
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Temp
+tmp/
+.tmp/
