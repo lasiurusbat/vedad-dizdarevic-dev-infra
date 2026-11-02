@@ -1,0 +1,97 @@
+# The one long-lived key in the setup. Terraform creates the USER ONLY. Create the access key by
+# hand (or with the rotation workflow) and store it with `wrangler secret put`, so the secret
+# never lands in Terraform state or outputs.
+resource "aws_iam_user" "worker" {
+  name = "${local.name}-worker"
+  path = "/service/"
+}
+
+data "aws_iam_policy_document" "worker" {
+  statement {
+    sid       = "ReadSiteObjects"
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.site.arn}/*"]
+  }
+
+  # AWS_IAM function URLs need BOTH actions. InvokeFunction is pinned to calls made through the
+  # function URL, so this user cannot call the function through the Lambda API.
+  statement {
+    sid       = "InvokeContactFunctionUrl"
+    actions   = ["lambda:InvokeFunctionUrl"]
+    resources = [aws_lambda_function.contact.arn]
+
+    condition {
+      test     = "StringEquals"
+      variable = "lambda:FunctionUrlAuthType"
+      values   = ["AWS_IAM"]
+    }
+  }
+
+  statement {
+    sid       = "InvokeContactFunctionViaUrlOnly"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [aws_lambda_function.contact.arn]
+
+    condition {
+      test     = "Bool"
+      variable = "lambda:InvokedViaFunctionUrl"
+      values   = ["true"]
+    }
+  }
+}
+
+resource "aws_iam_user_policy" "worker" {
+  name   = "site-read-and-contact-invoke"
+  user   = aws_iam_user.worker.name
+  policy = data.aws_iam_policy_document.worker.json
+}
+
+# ---------------------------------------------------------------------------------------------
+# Key-rotation role (Phase 10): assumed by the app repo's scheduled workflow on main. It can only
+# manage access keys of the Worker user.
+# ---------------------------------------------------------------------------------------------
+data "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+}
+
+data "aws_iam_policy_document" "rotation_trust" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:${var.github_org}/${var.app_repo}:ref:refs/heads/main"]
+    }
+  }
+}
+
+resource "aws_iam_role" "key_rotation" {
+  name                 = "${local.name}-key-rotation"
+  assume_role_policy   = data.aws_iam_policy_document.rotation_trust.json
+  max_session_duration = 3600
+}
+
+data "aws_iam_policy_document" "key_rotation" {
+  statement {
+    actions   = ["iam:ListAccessKeys", "iam:CreateAccessKey", "iam:DeleteAccessKey", "iam:UpdateAccessKey"]
+    resources = [aws_iam_user.worker.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "key_rotation" {
+  name   = "rotate-worker-key"
+  role   = aws_iam_role.key_rotation.id
+  policy = data.aws_iam_policy_document.key_rotation.json
+}

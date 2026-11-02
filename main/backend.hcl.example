@@ -1,0 +1,2 @@
+# Copy to backend.hcl (not secret, may be committed) and use the `state_bucket` output of bootstrap/.
+bucket = "vdd-tfstate-123456789012"

@@ -2,7 +2,7 @@
 
 Terraform for [vedad-dizdarevic.dev](https://vedad-dizdarevic.dev): AWS and Cloudflare infrastructure for a static portfolio site. The site, Worker and Lambda code live in the sibling `app` repo.
 
-> **Status:** planning done, no Terraform written yet. See the app repo's `documentation/implementation-plan.md` (Phase 1 onwards) for the task list.
+> **Status:** `bootstrap/` and `main/` are written and pass `terraform validate`; nothing has been applied yet. See the app repo's `documentation/implementation-plan.md` for the task list.
 
 ## Architecture
 
@@ -43,9 +43,15 @@ Bootstrap (once, locally):
 
 ```sh
 cd bootstrap
+cp terraform.tfvars.example terraform.tfvars   # fill in names and the GitHub org
 terraform init
 terraform apply
 ```
+
+Then in `main/`, copy `backend.hcl.example` to `backend.hcl` (bucket = bootstrap's `state_bucket` output) and
+`terraform init -backend-config=backend.hcl`. Variables without defaults (`site_bucket_name`, `cloudflare_account_id`,
+`github_org`, `app_repo`, `alert_email`, `dmarc_rua_email`) go in a git-ignored `terraform.tfvars` locally or in
+`TF_VAR_*` CI variables.
 
 Main stack (normally run by CI, not by hand):
 
