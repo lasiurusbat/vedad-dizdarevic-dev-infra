@@ -66,7 +66,7 @@ variable "purelymail_ownership_proof" {
 variable "lambda_reserved_concurrency" {
   description = "Reserved concurrency for the contact Lambda (cost and abuse cap). Brand-new AWS accounts have a total limit of 10 and AWS requires 10 unreserved, so a value >= 1 can fail until the limit is raised; set to -1 to leave unreserved."
   type        = number
-  default     = 2
+  default     = -1 # AWS rejects any reservation on this account (total limit leaves < 10 unreserved)
 }
 
 variable "budget_limit_usd" {
