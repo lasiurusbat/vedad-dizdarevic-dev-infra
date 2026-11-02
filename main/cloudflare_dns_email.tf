@@ -7,7 +7,7 @@ resource "cloudflare_dns_record" "mx" {
   name     = var.domain_name
   type     = "MX"
   content  = "mailserver.purelymail.com"
-  priority = 10
+  priority = 50 # per Purelymail setup docs
   ttl      = 3600
 }
 
@@ -17,7 +17,7 @@ resource "cloudflare_dns_record" "spf" {
   zone_id = cloudflare_zone.site.id
   name    = var.domain_name
   type    = "TXT"
-  content = "v=spf1 include:_spf.purelymail.com ~all"
+  content = "\"v=spf1 include:_spf.purelymail.com ~all\""
   ttl     = 3600
 }
 
@@ -27,7 +27,7 @@ resource "cloudflare_dns_record" "purelymail_ownership" {
   zone_id = cloudflare_zone.site.id
   name    = var.domain_name
   type    = "TXT"
-  content = "purelymail_ownership_proof=${var.purelymail_ownership_proof}"
+  content = "\"purelymail_ownership_proof=${var.purelymail_ownership_proof}\""
   ttl     = 3600
 }
 
@@ -69,7 +69,7 @@ resource "cloudflare_dns_record" "ses_mail_from_spf" {
   zone_id = cloudflare_zone.site.id
   name    = local.mail_from
   type    = "TXT"
-  content = "v=spf1 include:amazonses.com ~all"
+  content = "\"v=spf1 include:amazonses.com ~all\""
   ttl     = 3600
 }
 
@@ -78,6 +78,6 @@ resource "cloudflare_dns_record" "dmarc" {
   zone_id = cloudflare_zone.site.id
   name    = "_dmarc.${var.domain_name}"
   type    = "TXT"
-  content = "v=DMARC1; p=${var.dmarc_policy}; rua=mailto:${var.dmarc_rua_email}; adkim=r; aspf=r"
+  content = "\"v=DMARC1; p=${var.dmarc_policy}; rua=mailto:${var.dmarc_rua_email}; adkim=r; aspf=r\""
   ttl     = 3600
 }
