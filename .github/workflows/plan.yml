@@ -11,6 +11,12 @@ permissions:
   id-token: write # OIDC to AWS, no stored keys
   pull-requests: write # sticky plan comment
 
+# bash with pipefail (-eo pipefail): without it, `terraform ... | tee` reports tee's exit code and a
+# failed plan or apply looks like a success.
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: plan-${{ github.ref }}
   cancel-in-progress: true
