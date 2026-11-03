@@ -1,4 +1,8 @@
 resource "aws_s3_bucket" "state" {
+  #checkov:skip=CKV_AWS_145:SSE-S3 is deliberate for the state bucket: access is limited to the CI roles and the owner, and a customer managed key adds a dependency that can lock out recovery
+  #checkov:skip=CKV_AWS_144:Single-region state bucket with versioning; replication adds cost for a one-person project
+  #checkov:skip=CKV2_AWS_62:No consumer for S3 event notifications
+  #checkov:skip=CKV_AWS_18:Access logging needs a second bucket to secure; access is limited to the CI roles and the owner
   bucket = var.state_bucket_name
 }
 
@@ -26,6 +30,8 @@ resource "aws_s3_bucket_versioning" "state" {
   }
 }
 
+# SSE-S3 is deliberate for the state bucket: access is limited to the CI roles and the owner, and a customer managed key adds a dependency that can lock out recovery
+#trivy:ignore:AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   bucket = aws_s3_bucket.state.id
 

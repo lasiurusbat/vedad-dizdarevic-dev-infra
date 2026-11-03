@@ -87,7 +87,12 @@ resource "aws_iam_role" "infra_apply" {
   max_session_duration = 3600
 }
 
+# The apply role manages Terraform for this project: S3 on the site bucket, IAM only on vdd-* names, trusted only from main or the production environment. Narrowing further is tracked as a permissions-boundary hardening task
+#trivy:ignore:AWS-0345
 data "aws_iam_policy_document" "infra_apply" {
+  #checkov:skip=CKV_AWS_111:The apply role manages Terraform for this project: S3 on the site bucket, IAM only on vdd-* names, trusted only from main or the production environment. Narrowing further is tracked as a permissions-boundary hardening task
+  #checkov:skip=CKV_AWS_109:The apply role manages Terraform for this project: S3 on the site bucket, IAM only on vdd-* names, trusted only from main or the production environment. Narrowing further is tracked as a permissions-boundary hardening task
+  #checkov:skip=CKV_AWS_356:The apply role manages Terraform for this project: S3 on the site bucket, IAM only on vdd-* names, trusted only from main or the production environment. Narrowing further is tracked as a permissions-boundary hardening task
   statement {
     sid       = "ListState"
     actions   = ["s3:ListBucket"]
