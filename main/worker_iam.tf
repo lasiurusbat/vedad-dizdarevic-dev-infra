@@ -58,8 +58,10 @@ resource "aws_iam_user_policy" "worker" {
 # Key-rotation role (Phase 10): assumed by the app repo's scheduled workflow on main. It can only
 # manage access keys of the Worker user.
 # ---------------------------------------------------------------------------------------------
+# Looked up by ARN, not URL: a URL lookup calls iam:ListOpenIDConnectProviders, which the CI apply
+# role does not (and should not need to) have.
 data "aws_iam_openid_connect_provider" "github" {
-  url = "https://token.actions.githubusercontent.com"
+  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
 }
 
 data "aws_iam_policy_document" "rotation_trust" {
