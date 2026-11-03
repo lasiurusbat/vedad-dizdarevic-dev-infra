@@ -19,6 +19,12 @@ permissions:
 
 # One apply at a time, and never cancel one that is running: a cancelled apply can leave
 # state locked and resources half-created. Newer pushes wait their turn.
+# bash with pipefail (-eo pipefail): without it, `terraform ... | tee` reports tee's exit code and a
+# failed plan or apply looks like a success.
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: apply
   cancel-in-progress: false

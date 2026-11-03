@@ -122,6 +122,7 @@ data "aws_iam_policy_document" "infra_apply" {
     resources = [
       "arn:aws:iam::${local.account_id}:role/${local.iam_prefix}*",
       "arn:aws:iam::${local.account_id}:user/${local.iam_prefix}*",
+      "arn:aws:iam::${local.account_id}:user/service/${local.iam_prefix}*", # the Worker user lives under /service/
       "arn:aws:iam::${local.account_id}:policy/${local.iam_prefix}*",
     ]
   }
