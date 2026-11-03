@@ -2,8 +2,15 @@
 # hand (or with the rotation workflow) and store it with `wrangler secret put`, so the secret
 # never lands in Terraform state or outputs.
 resource "aws_iam_user" "worker" {
+  #checkov:skip=CKV_AWS_273:Cloudflare Workers cannot assume an IAM role or use SSO; this one scoped long-lived key is the documented exception, rotated every 90 days
   name = "${local.name}-worker"
   path = "/service/"
+
+  lifecycle {
+    # The IAM console stores an access key's description as a tag on the user (key id to
+    # description), so tags change outside Terraform every time the key is rotated.
+    ignore_changes = [tags, tags_all]
+  }
 }
 
 data "aws_iam_policy_document" "worker" {
@@ -41,6 +48,7 @@ data "aws_iam_policy_document" "worker" {
 }
 
 resource "aws_iam_user_policy" "worker" {
+  #checkov:skip=CKV_AWS_40:The policy is attached to a single-purpose user that exists only for the Worker; a group would add indirection
   name   = "site-read-and-contact-invoke"
   user   = aws_iam_user.worker.name
   policy = data.aws_iam_policy_document.worker.json

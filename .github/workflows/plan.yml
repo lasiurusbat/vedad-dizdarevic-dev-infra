@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   id-token: write # OIDC to AWS, no stored keys
+  pull-requests: write # sticky plan comment
 
 concurrency:
   group: plan-${{ github.ref }}
@@ -52,3 +53,24 @@ jobs:
             tail -c 60000 "$RUNNER_TEMP/plan.txt" 2>/dev/null
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: comment on the PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          marker='<!-- terraform-plan -->'
+          {
+            echo "$marker"
+            echo '### terraform plan (main)'
+            echo '```'
+            tail -c 60000 "$RUNNER_TEMP/plan.txt" 2>/dev/null
+            echo '```'
+          } > "$RUNNER_TEMP/comment.md"
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            -q ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@"$RUNNER_TEMP/comment.md" > /dev/null
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@"$RUNNER_TEMP/comment.md" > /dev/null
+          fi

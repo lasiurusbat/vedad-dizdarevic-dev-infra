@@ -5,6 +5,8 @@ data "archive_file" "contact_placeholder" {
 }
 
 resource "aws_cloudwatch_log_group" "contact" {
+  #checkov:skip=CKV_AWS_158:CloudWatch Logs encrypts at rest by default; a customer managed key adds cost and key policy upkeep
+  #checkov:skip=CKV_AWS_338:30 days is deliberate: the function may log contact request details, and GDPR data minimisation favours short retention
   name              = "/aws/lambda/${local.name}-contact"
   retention_in_days = 30
 }
@@ -48,6 +50,11 @@ resource "aws_iam_role_policy" "contact" {
 }
 
 resource "aws_lambda_function" "contact" {
+  #checkov:skip=CKV_AWS_117:A VPC would need NAT or endpoints (cost) and the function only calls SES
+  #checkov:skip=CKV_AWS_272:Code signing is not worth the overhead for one function deployed from this repo through CI
+  #checkov:skip=CKV_AWS_173:Environment variables hold addresses and a configuration set name, no secrets
+  #checkov:skip=CKV_AWS_116:Synchronous invocation: the caller gets the error and the form shows it; a DLQ only applies to async invokes
+  #checkov:skip=CKV_AWS_50:Single-step function with no downstream calls other than SES; X-Ray adds cost without insight
   function_name = "${local.name}-contact"
   role          = aws_iam_role.contact.arn
   runtime       = "nodejs24.x"
