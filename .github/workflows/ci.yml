@@ -34,6 +34,36 @@ jobs:
           terraform init -backend=false -input=false
           terraform validate
 
+  trivy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: trivy config scan
+        run: |
+          v=0.76.1
+          base="https://github.com/aquasecurity/trivy/releases/download/v${v}"
+          curl -sSfLO "${base}/trivy_${v}_Linux-64bit.tar.gz"
+          curl -sSfLO "${base}/trivy_${v}_checksums.txt"
+          sha256sum --ignore-missing -c "trivy_${v}_checksums.txt"
+          tar -xzf "trivy_${v}_Linux-64bit.tar.gz" trivy
+          # Exceptions live next to the code as `#trivy:ignore:<id>` with a reason.
+          ./trivy config --severity HIGH,CRITICAL --exit-code 1 --skip-dirs '**/.terraform' .
+
+  checkov:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: checkov
+        run: |
+          pip install --quiet checkov==3.4.3
+          # Exceptions live next to the code as `#checkov:skip=<id>:<reason>`.
+          checkov -d . --framework terraform --quiet --compact
+
   secrets:
     runs-on: ubuntu-latest
     timeout-minutes: 10

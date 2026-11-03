@@ -1,4 +1,8 @@
 resource "aws_s3_bucket" "site" {
+  #checkov:skip=CKV_AWS_145:SSE-S3 is deliberate: the bucket holds public static files; a customer managed key adds cost and a kms:Decrypt grant for the Worker for no confidentiality gain
+  #checkov:skip=CKV_AWS_144:Public static site; cross-region replication adds cost and the site is rebuilt from git on every deploy
+  #checkov:skip=CKV2_AWS_62:No consumer for S3 event notifications
+  #checkov:skip=CKV_AWS_18:Every read goes through the Worker; Cloudflare analytics and Worker logs cover access, and a log bucket is a second bucket to secure
   bucket = var.site_bucket_name
 }
 
@@ -26,6 +30,8 @@ resource "aws_s3_bucket_versioning" "site" {
   }
 }
 
+# SSE-S3 is deliberate: the bucket holds public static files; a customer managed key adds cost and a kms:Decrypt grant for the Worker for no confidentiality gain
+#trivy:ignore:AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
   bucket = aws_s3_bucket.site.id
 
