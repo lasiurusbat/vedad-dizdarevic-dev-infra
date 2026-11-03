@@ -2,7 +2,7 @@
 
 Terraform for [vedad-dizdarevic.dev](https://vedad-dizdarevic.dev): AWS and Cloudflare infrastructure for a static portfolio site. The site, Worker and Lambda code live in the sibling `app` repo.
 
-> **Status:** `bootstrap/` and `main/` are applied (2026-11-02), and `terraform plan` in CI reports no changes. Still to add: the apply workflow and Trivy/Checkov. See the app repo's `documentation/implementation-plan.md` for the task list.
+> **Status:** `bootstrap/` and `main/` are applied (2026-11-02), and `terraform plan` in CI reports no changes. The apply workflow, Trivy/Checkov and the plan PR comment are in place. See the app repo's `documentation/implementation-plan.md` for the task list.
 
 ## Architecture
 
@@ -65,9 +65,9 @@ terraform plan
 
 ## CI/CD
 
-- **Pull request (live):** `terraform fmt -check`, `validate`, gitleaks, and `terraform plan` (output in the job summary) through the `gh-infra-plan` role.
-- **Planned:** Trivy/Checkov and the plan as a PR comment.
-- **Merge to `main` (planned):** `terraform apply` in the protected `production` environment through `gh-infra-apply`. Until it exists, apply is run locally.
+- **Pull request:** `terraform fmt -check`, `validate`, gitleaks, Trivy (config scan, HIGH and CRITICAL), Checkov, and `terraform plan` through the `gh-infra-plan` role. The plan is posted as a sticky PR comment and in the job summary.
+- **Scanner exceptions** live next to the code as `#checkov:skip=<id>:<reason>` and `#trivy:ignore:<id>` with a reason above it. A new finding fails the build; add an exception only with a real reason, never a global skip.
+- **Merge to `main`:** `apply.yml` runs `terraform apply` in the protected `production` environment through `gh-infra-apply` when `main/**` changes. One apply at a time, never cancelled mid-run. It refuses a plan that deletes or replaces anything unless a person re-runs it manually with `allow_destroy=true`. `bootstrap/` is still applied locally.
 - **Auth:** GitHub Actions assumes AWS roles through OIDC, each trusted for one repo and ref. No long-lived AWS keys in CI.
 
 Quality gates fail the build; don't weaken a threshold to get green.

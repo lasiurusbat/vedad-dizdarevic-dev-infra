@@ -1,4 +1,7 @@
+# AWS managed key alias/aws/sns cannot be used by CloudWatch alarms and Budgets to publish, and a customer managed key costs money; the topic carries alarm text only
+#trivy:ignore:AWS-0095
 resource "aws_sns_topic" "alerts" {
+  #checkov:skip=CKV_AWS_26:AWS managed key alias/aws/sns cannot be used by CloudWatch alarms and Budgets to publish, and a customer managed key costs money; the topic carries alarm text only
   name = "${local.name}-alerts"
 }
 
