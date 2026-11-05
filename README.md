@@ -89,4 +89,5 @@ Small PRs, one task each. `main` is protected and always applyable.
 - **Lambda reserved concurrency** is `-1` (not reserved): AWS rejects any reservation on this account because it must keep 10 unreserved.
 - **Cloudflare Web Analytics** is not managed here: the API returned 403 for the Terraform token. Revisit in Phase 10.
 - **Shared AWS account:** account `769814228024` also hosts sorted.onl. Everything here is prefixed `vdd-` (bootstrap roles are `gh-*`), and the apply role is scoped to that prefix.
+- **Budget scope:** `vdd-monthly` filters on the `Project = vedad-dizdarevic.dev` tag (set by the provider's `default_tags`), so sorted.onl's costs don't trigger it. The `Project` cost allocation tag is activated by hand in the Billing console (the apply role has no `ce:` permissions); if it is ever deactivated, the budget silently reads $0. Costs are only tagged from activation onwards.
 - **Cloudflare zone settings** cannot be destroyed through Terraform; `terraform destroy` leaves them in place.

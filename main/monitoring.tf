@@ -82,6 +82,14 @@ resource "aws_budgets_budget" "monthly" {
   limit_amount = tostring(var.budget_limit_usd)
   limit_unit   = "USD"
 
+  # The account is shared with sorted.onl; without this filter the budget
+  # tracks (and forecasts) the whole account. Needs the Project tag to be
+  # active as a cost allocation tag (Billing console, not managed here).
+  cost_filter {
+    name   = "TagKeyValue"
+    values = ["user:Project$vedad-dizdarevic.dev"]
+  }
+
   notification {
     comparison_operator        = "GREATER_THAN"
     threshold                  = 100
