@@ -8,7 +8,8 @@ locals {
 }
 
 # ---------------------------------------------------------------------------------------------
-# App repo, main branch: deploy role. Writes to the site bucket only, no access to Terraform state.
+# App repo, main branch: deploy role. Writes to the site bucket and updates the contact function's
+# code, no access to Terraform state.
 # ---------------------------------------------------------------------------------------------
 resource "aws_iam_role" "app_deploy" {
   name                 = "gh-app-deploy"
@@ -27,6 +28,14 @@ data "aws_iam_policy_document" "app_deploy" {
     sid       = "WriteSiteObjects"
     actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
     resources = ["arn:aws:s3:::${var.site_bucket_name}/*"]
+  }
+
+  # The code of the contact function ships from the app repo; Terraform owns its configuration.
+  # GetFunctionConfiguration is what `aws lambda wait function-updated` polls.
+  statement {
+    sid       = "UpdateContactFunctionCode"
+    actions   = ["lambda:UpdateFunctionCode", "lambda:GetFunctionConfiguration"]
+    resources = ["arn:aws:lambda:${var.region}:${local.account_id}:function:${local.iam_prefix}contact"]
   }
 }
 
