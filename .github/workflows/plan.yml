@@ -35,12 +35,12 @@ jobs:
       TF_VAR_dmarc_rua_email: ${{ vars.DMARC_RUA_EMAIL }}
       TF_VAR_purelymail_ownership_proof: ${{ vars.PURELYMAIL_OWNERSHIP_PROOF }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version_file: .terraform-version
           terraform_wrapper: false
-      - uses: aws-actions/configure-aws-credentials@v5
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
           aws-region: eu-central-1
