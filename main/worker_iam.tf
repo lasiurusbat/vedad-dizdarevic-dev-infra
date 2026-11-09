@@ -65,6 +65,7 @@ data "aws_iam_openid_connect_provider" "github" {
 }
 
 data "aws_iam_policy_document" "rotation_trust" {
+  #checkov:skip=CKV_AWS_358:The subject is the immutable form (owner and repo IDs, pinned to refs/heads/main), which is stricter than the name-based pattern this check expects; a name-based subject does not match what GitHub sends for this account
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
