@@ -30,7 +30,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
 
 resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
   alarm_name          = "${local.name}-contact-lambda-throttles"
-  alarm_description   = "Contact Lambda hit its concurrency cap (abuse or misconfiguration)."
+  alarm_description   = "Contact Lambda was throttled (account-wide concurrency limit reached)."
   namespace           = "AWS/Lambda"
   metric_name         = "Throttles"
   dimensions          = { FunctionName = aws_lambda_function.contact.function_name }
@@ -39,6 +39,25 @@ resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
   evaluation_periods  = 1
   threshold           = 1
   comparison_operator = "GreaterThanOrEqualToThreshold"
+  treat_missing_data  = "notBreaching"
+  alarm_actions       = [aws_sns_topic.alerts.arn]
+  ok_actions          = [aws_sns_topic.alerts.arn]
+}
+
+# Concurrency is not reserved on this account (AWS rejects it), so the throttle alarm above only fires at the
+# account-wide limit. Turnstile and the Worker's checks are the brakes; this alarm tells us when they are
+# being leaned on. A handful of real messages a day is normal, so 30 in an hour is not a visitor.
+resource "aws_cloudwatch_metric_alarm" "lambda_invocations" {
+  alarm_name          = "${local.name}-contact-lambda-invocations"
+  alarm_description   = "Contact Lambda invoked more than 30 times in an hour (abuse, or a loop)."
+  namespace           = "AWS/Lambda"
+  metric_name         = "Invocations"
+  dimensions          = { FunctionName = aws_lambda_function.contact.function_name }
+  statistic           = "Sum"
+  period              = 3600
+  evaluation_periods  = 1
+  threshold           = 30
+  comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_sns_topic.alerts.arn]
   ok_actions          = [aws_sns_topic.alerts.arn]
