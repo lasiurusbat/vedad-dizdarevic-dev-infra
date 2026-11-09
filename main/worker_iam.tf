@@ -65,6 +65,7 @@ data "aws_iam_openid_connect_provider" "github" {
 }
 
 data "aws_iam_policy_document" "rotation_trust" {
+  #checkov:skip=CKV_AWS_358:The subject is the immutable form (owner and repo IDs, pinned to refs/heads/main), which is stricter than the name-based pattern this check expects; a name-based subject does not match what GitHub sends for this account
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
@@ -82,7 +83,8 @@ data "aws_iam_policy_document" "rotation_trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_org}/${var.app_repo}:ref:refs/heads/main"]
+      # The immutable subject, like the bootstrap roles: a subject built from names does not match.
+      values = ["repo:${var.github_org}@${var.github_owner_id}/${var.app_repo}@${var.app_repo_id}:ref:refs/heads/main"]
     }
   }
 }
