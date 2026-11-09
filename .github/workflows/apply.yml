@@ -46,7 +46,7 @@ jobs:
       TF_VAR_purelymail_ownership_proof: ${{ vars.PURELYMAIL_OWNERSHIP_PROOF }}
     steps:
       - uses: actions/checkout@v7
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version_file: .terraform-version
           terraform_wrapper: false
