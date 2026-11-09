@@ -30,6 +30,16 @@ variable "app_repo" {
   type        = string
 }
 
+variable "github_owner_id" {
+  description = "Numeric ID of the GitHub owner, for the key-rotation role's immutable OIDC subject (a name-based subject makes AssumeRoleWithWebIdentity fail). `gh api users/<owner> --jq .id`"
+  type        = number
+}
+
+variable "app_repo_id" {
+  description = "Numeric ID of the app repo, for the same subject. `gh api repos/<owner>/<repo> --jq .id`"
+  type        = number
+}
+
 variable "alert_email" {
   description = "Email that receives CloudWatch alarm (via SNS) and AWS Budgets notifications. Each subscription must be confirmed by clicking the link in the first mail."
   type        = string

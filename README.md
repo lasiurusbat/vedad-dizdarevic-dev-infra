@@ -50,8 +50,8 @@ terraform apply
 
 Then in `main/`, copy `backend.hcl.example` to `backend.hcl` (bucket = bootstrap's `state_bucket` output) and
 `terraform init -backend-config=backend.hcl`. Variables without defaults (`site_bucket_name`, `cloudflare_account_id`,
-`github_org`, `app_repo`, `alert_email`, `dmarc_rua_email`) go in a git-ignored `terraform.tfvars` locally or in
-`TF_VAR_*` CI variables. CI gets them from Actions variables (`AWS_ACCOUNT_ID`, `CLOUDFLARE_ACCOUNT_ID`, `ALERT_EMAIL`, `DMARC_RUA_EMAIL`, `PURELYMAIL_OWNERSHIP_PROOF`, `TF_STATE_BUCKET`, role ARNs) and the `CLOUDFLARE_API_TOKEN` secret; a variable missing in CI shows up as a spurious diff (a missing `purelymail_ownership_proof` planned to delete the ownership TXT record).
+`github_org`, `app_repo`, `github_owner_id`, `app_repo_id`, `alert_email`, `dmarc_rua_email`) go in a git-ignored `terraform.tfvars` locally or in
+`TF_VAR_*` CI variables. CI gets them from Actions variables (`AWS_ACCOUNT_ID`, `CLOUDFLARE_ACCOUNT_ID`, `ALERT_EMAIL`, `DMARC_RUA_EMAIL`, `GH_OWNER_ID`, `APP_REPO_ID`, `PURELYMAIL_OWNERSHIP_PROOF`, `TF_STATE_BUCKET`, role ARNs) and the `CLOUDFLARE_API_TOKEN` secret; a variable missing in CI shows up as a spurious diff (a missing `purelymail_ownership_proof` planned to delete the ownership TXT record).
 
 Main stack (normally run by CI, not by hand):
 
