@@ -54,7 +54,7 @@ variable "contact_to_address" {
 variable "dmarc_policy" {
   description = "DMARC policy. Start at none, then quarantine, then reject once reports show only aligned mail."
   type        = string
-  default     = "none"
+  default     = "quarantine"
 
   validation {
     condition     = contains(["none", "quarantine", "reject"], var.dmarc_policy)
