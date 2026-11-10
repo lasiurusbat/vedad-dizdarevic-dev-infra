@@ -49,7 +49,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
 # being leaned on. A handful of real messages a day is normal, so 30 in an hour is not a visitor.
 resource "aws_cloudwatch_metric_alarm" "lambda_invocations" {
   alarm_name          = "${local.name}-contact-lambda-invocations"
-  alarm_description   = "Contact Lambda invoked more than 30 times in an hour (abuse, or a loop)."
+  alarm_description   = "Contact Lambda invoked more than 30 times in an hour (abuse, or a loop). [rollback test]"
   namespace           = "AWS/Lambda"
   metric_name         = "Invocations"
   dimensions          = { FunctionName = aws_lambda_function.contact.function_name }
